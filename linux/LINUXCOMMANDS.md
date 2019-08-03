@@ -36,3 +36,20 @@ grep string-to-search
 
 - This command takes output of one command and give as input to next command.
 - This command takes 
+
+## hostname
+
+- displays the hosname of the system.
+- change the hostname
+
+```sh
+hostname new-name
+```
+
+## shutdown
+
+to shut down a machine
+
+```sh
+shutdown now
+```

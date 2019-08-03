@@ -331,3 +331,11 @@ docker run -v my_volume:/var/lib/mysql mysql #utilizing external volume
 docker system df
 docker system df -v
 ```
+
+## docker swarm
+
+This commands are mentioned in the note section
+
+## docker node
+
+This commands are mentioned in the note section.
