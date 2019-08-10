@@ -4,13 +4,19 @@
 
 concatination
 
-### Find verstion os
+## Find IP address
+
+```sh
+ifconfig
+```
+
+## Find verstion os
 
 ```sh
 cat /etc/*release*
 ```
 
-### Find hosts
+## Find hosts
 
 ```sh
 cat /etc/hosts
@@ -46,6 +52,50 @@ grep string-to-search
 hostname new-name
 ```
 
+```sh
+vi /etc/hostname
+vi /etc/hosts
+```
+
+## set ip address to a network
+
+```sh
+ifconfig <networkname> xxx.xxx.x.x #this changes are not permanent
+```
+
+- make changes in the `/etc/network/interfaces`
+
+```sh
+auto enp0s8
+iface enp0s8 inet static
+address 198.168.53.2
+netmask 255.255.255.0
+```
+
+## swap on off
+
+from terminal: only valid for a perticular session
+
+```sh
+swapoff -a
+```
+
+to make this change permanent
+
+```sh
+vi /etc/fstab #comment all the swap lines
+```
+
+## service
+
+- verify some service are available or not.
+- One need to know the name of the service.
+- For example I need to see if SSH service is available in my host.
+
+```sh
+service ssh status
+```
+
 ## shutdown
 
 to shut down a machine
@@ -53,3 +103,21 @@ to shut down a machine
 ```sh
 shutdown now
 ```
+
+## reboot
+
+reboot will restart your server. This can be done only with root user. Use sudo su.
+
+## apt-get
+
+>NOTE: apt-get may throw error if it do not have permission. Grant access using sudo.
+
+```sh
+sudo su # this grant root user access
+```
+
+- **apt-get update** : this update the apt-get utility.
+- **apt-get install package-name**: intall apackage manager.
+
+ssh package name: openssh-server
+docker package name: docker.io
