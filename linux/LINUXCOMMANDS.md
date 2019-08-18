@@ -118,6 +118,18 @@ sudo su # this grant root user access
 
 - **apt-get update** : this update the apt-get utility.
 - **apt-get install package-name**: intall apackage manager.
+- **apt-cache madison docker-ce**: lists all the docker images available for download
+- **apt-cache pkgnames `<package name>`** lists all the docker packages installed.
+- **apt-get remove `<package name>`** remove the package name.
 
 ssh package name: openssh-server
 docker package name: docker.io
+
+## systemctl
+
+`systemctl daemon-reload`
+`systemctl restart docker`
+
+## TODO
+
+- read about cgroups in unix. Why kubernetes uses systemd

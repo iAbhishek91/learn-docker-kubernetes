@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  my-name
+  labels:
+    app:  my-name
+spec:
+  containers:
+    - image:  image
+      name:  my-name
+      env:
+      - name:  ENVVARNAME
+        value:  ENVVARVALUE
