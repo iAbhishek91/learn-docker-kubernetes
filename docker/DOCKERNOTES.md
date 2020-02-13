@@ -220,7 +220,7 @@ Always the internal DNS server runs on `127.0.0.11`.
 - Any change in the file system remains in the container itself.
 - So if you store any data in a container and stop or remove (rm) your container before backing up, it will destroy all your changes and data.
 - For **persistenting data** we have to map a directory outside the container(probably in docker host), where we can backup the data.
-- For mapping directory or volume, use the option `-v dir/path/name:internal/dir/path/name`.
+- For mapping directory or volume, use the option `-v dir/path/name:internal/dir/path/name`. Volumes are mounted within the container.
 
 ## what are Dockerfile
 

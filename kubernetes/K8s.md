@@ -1,7 +1,7 @@
 # K8s
 
 - created by google
-- container orchastration technoilogy.
+- container orchestration technology.
 
 ## Advantages
 
@@ -169,10 +169,10 @@ kubectl scale --replicas=6 -f replicaset.yml
 Normally while deploying services we have few common scenario. Below are few
 
 - for high availability we need to have multiple instances running.
-- we should scale applicaiton at runtime.
+- we should scale application at runtime.
 - we should be able to upgrade or roll back changes. Upgrade and roll back can be done following different strategy. like: **rolling update** or **canary deployments**.
 - upgrade the underlying dependencies, like upgrading node, or web server version etc.
-- resume or start caoabilities.
+- resume or start capabilities.
 
 These all are available as a package in a kubernetes object known as `deployment`.
 Deployment set are higher in the hierarchy.
