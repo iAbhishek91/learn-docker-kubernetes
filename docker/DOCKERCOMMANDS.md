@@ -34,7 +34,7 @@ docker run ubuntu
 ```
 
 - docker containers are meant to run services or commands.
-- If there is nothing to be exeuted, docker terminates the container immideately.
+- If there is nothing to be executed, docker terminates the container immediately.
 - `docker run ubuntu` will run the container and exit as there is nothing to be executed within the container.
 - We can execute any commands, and until and unless that command finishes.
 - the above example will keep the container alive for 10 seconds.
@@ -88,7 +88,7 @@ docker run -i my_container
 ```
 
 - **Port mapping** -p docker-host-port:container-internal-port
-- We can run multiple instances of the web services in separate containers andmap to different docker host port.
+- We can run multiple instances of the web services in separate containers and map to different docker host port.
 - Obviously, use of one port multiple times are prohibited.
 
 ```sh
@@ -139,10 +139,11 @@ docker run --link redis:redis image-dependent-require-redis
 
 ## docker inspect
 
-- This command prints lot of information about the contianer that is running.
+- This command prints lot of information about the container that is running.
   - Environment variable
   - Networking details
-  - File system and space utiized
+  - File system and space utilized
+  - Labels
   - many more
 
 ```sh
@@ -202,10 +203,44 @@ docker rm 82 15 e4 57 de
 docker images
 ```
 
+- remove images
+
+```sh
+docker images rm image_ids
+```
+
+- remove dangling images, unused images (not linked with container)
+
+```sh
+docker images prune -f
+docker images prune -a
+```
+
+## docker container
+
+- to see all containers
+
+```sh
+docker container ls -a
+```
+
+- to delete all stopped docker container. Use `--force` or `-f` for forcefully delete
+
+```sh
+docker container prune -f
+```
+
+- stop all docker container. ls -aq returns list container id
+
+```sh
+docker container stop $(docker container ls -aq)
+```
+
 ## docker rmi
 
 - To remove an image from the disk.
 - Verify the image is not available in the disk using `docker images`.
+- Alternatively we can `docker images rm docker_image_ids`
 
 > Note: Before removing an image, make sure that all the container of that image are removed. Else an error(conflict) is thrown.
 
@@ -321,6 +356,24 @@ docker volume create my_volume #create a new volume
 docker run -v my_volume:/var/lib/mysql mysql #utilizing external volume
 ```
 
+- list all the volume
+
+```sh
+docker volume ls
+```
+
+- delete volume
+
+```sh
+docker volume rm volume_name
+```
+
+- delete all unused volumes
+
+```sh
+docker volume prune -f
+```
+
 ## docker system
 
 - this command displayes all info about docker hosts.
@@ -330,6 +383,18 @@ docker run -v my_volume:/var/lib/mysql mysql #utilizing external volume
 ```sh
 docker system df
 docker system df -v
+```
+
+- to remove all stop container, dangling images and networks and cache
+
+```sh
+docker system prune --force
+```
+
+- to remove all unused volumes
+
+```sh
+docker system prune --volumes
 ```
 
 ## docker swarm

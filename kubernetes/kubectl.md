@@ -10,6 +10,14 @@ basic run command syntax **kubectl run `<podname>` --image `<container-name>`**
 
 ## kubectl cluster info
 
+```sh
+kubectl cluster-info
+
+# OUTPUT
+# Kubernetes master is running at https://192.168.1.248:8443
+# KubeDNS is running at https://192.168.1.248:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+```
+
 ## kubectl get
 
 get info about everything: **kubectl get all**

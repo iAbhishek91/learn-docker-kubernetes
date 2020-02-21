@@ -4,7 +4,7 @@ docker concepts, commands, compose and kubernetes
 
 ## Why docker
 
-We will have compatibility issues and to maintain the environment. We have make sure that libraries, dependents, os and hardware used are consistent for all the system used starting from development machine to web server.
+We will have compatibility issues and to maintain the environment. We have to make sure that libraries, dependents, os and hardware used are consistent for all the system used, starting from development machine to production servers.
 
 This problem is commonly known as **matrix of hell**.
 
@@ -16,11 +16,11 @@ This problem is mainly solved by docker.
 
 When we install docker we install three different component on your host(linux host to be specific):
 
-- **Docker deamon**: this is a background process which manages networks, volumes and docker images, containers.
-- **Rest API**: is a exposed layer which can communicate with the deamon and provide innstruction to be executed. Engineers can use this to create their own tools.
-- **Docker CLI**: Command line tool which are used to run commands that we have seen. Docker cli under the hood uses the rest-apis to communicate with the docker deamon.
+- **Docker daemon**: this is a background process which manages networks, volumes and docker images, containers.
+- **Rest API**: is a exposed layer which can communicate with the daemon and provide instruction to be executed. Engineers can use this to create their own tools.
+- **Docker CLI**: Command line tool which are used to run commands that we have seen. Docker cli under the hood uses the rest-apis to communicate with the docker daemon.
 
-These three component togather known as Docker Cli.
+These three component together known as Docker Cli.
 
 > Note: Docker CLI's may not be present on the same system, it can connect from any system.
 To achieve that we can use -H
@@ -28,14 +28,14 @@ To achieve that we can use -H
 ### Container (under the hood)
 
 - Docker uses namespace isolation to keep all the container's info separate.
-- Namespace isolations are used in all the aspect of a container. Like: processes, etc.
+- Namespace isolation are used in all the aspect of a container. Like: processes, etc.
 - Linux system starts with one process, 'process-1'. Later that process-1 starts all other processes as child process.
 - Inside a container there may be several processes, which are numbered as 1, 2, 3 and so on. However, in host system, we cant have process 1, 2 and 3 as these process number already exists. Two process cant have same process id. So they are mapped with other process_number in the host.
 - This is the reason, the process running on container will always have separate process id inside the container and different one in the host machine.
 
 - Host system will have resources CPU and Memory. These are shared among the system as well as the containers. The question how does docker manages all the resources.
-- By default there is no such restrition or limitation of resources to be used by containers.
-- However there is way we can explicitely put some restriction on the memory and CPU used by a container.
+- By default there is no such restriction or limitation of resources to be used by containers.
+- However there is way we can explicitly put some restriction on the memory and CPU used by a container.
 - Docker uses **CGROUPs** known as control group to manage the resources.
 
 ### Storage system (under the hood)
@@ -50,7 +50,7 @@ To achieve that we can use -H
 - When we map an extenal volume to a internal volume inside container, the external volume is mapped within the docker container. Hence everything that are written inside the container are persisted.
 - If the volume do not live in the `/var/lib/docker/volume` folder, then we need provide the absolute path instead of only the name. This type of mounting is know as **BIND-MOUNTING**.
 
-- All these file system managment we spoke earlier are managed by **Storage drivers**.
+- All these file system management we spoke earlier are managed by **Storage drivers**.
   - AUFS
   - ZFS
   - BTFRS
@@ -61,8 +61,16 @@ To achieve that we can use -H
 
 Want to read more, please refer [Docker storage docs](https://docs.docker.com/storage/)
 
+## Installation
+
+### CentOS or RHEL
+
+There are multiple way to do that, however the below is recommended way.
+Recommended way: https://docs.docker.com/install/linux/docker-ce/centos/#install-using-the-repository
+
 ## what are images
 
+- Images are just a tarball.
 - Images are created from docker file.
 - Each docker image is a layered architecture.
 - It also has a default command.
@@ -74,7 +82,7 @@ Want to read more, please refer [Docker storage docs](https://docs.docker.com/st
 docker run image_name [command]
 ```
 
-- To make this change permanenet we need to create another image from the base image and mention the command.
+- To make this change permanent we need to create another image from the base image and mention the command.
 
 First way is to mention the **CMD**. In this case the entire command have to be mentioned.
 
@@ -90,7 +98,7 @@ docker run ubuntu-sleeper #executes the command mentioned
 docker run ubuntu-sleeper sleep 10 #override the default command, hence entire command is always required
 ```
 
-If we dont want to mention the `sleep` keyword, what we can do?
+If we don't want to mention the `sleep` keyword, what we can do?
 
 Another way is to mention is **ENTRYPOINT**. Where we can append the argument to the command passed.
 
@@ -102,8 +110,8 @@ ENTRYPOINT ["sleep"] #json format is only supported
 to execute the above image
 
 ```sh
-docker run ubuntu-sleeper 50 #option is mandetory otherwise it will throw error
-docker run ubuntu-sleeper 10 #option is mandetory otherwise it will throw error
+docker run ubuntu-sleeper 50 #option is mandatory otherwise it will throw error
+docker run ubuntu-sleeper 10 #option is mandatory otherwise it will throw error
 ```
 
 How to define a default value to **ENTRYPOINT**:
@@ -147,20 +155,20 @@ The above is the only difference between **CMD** and **ENTRYPOINT**.
 
 ## Networking
 
-- When we install docker it creats three networks automatically `bridge`, `none` and `host`.
+- When we install docker it creates three networks automatically `bridge`, `none` and `host`.
 - By default the each container gets attached with bridge network of the docker. We can change this using the below command.
   - Bridge network:
     They are private network.
     Each container gets a IP address, generally in a range of '172.17.X.X'.
     Containers can communicate within themselfs as they all are in the same private network.
     However to work with the external world, port should be mapped.
-  Host netowrk:
+  Host network:
     They are public network.
     Both containers and docker hub uses the same network, hence no port mapping is required.
-    This also means that we cant run same contianers on the same docker host (post will same).
+    This also means that we cant run same containers on the same docker host (post will same).
   None network:
     The containers do not have any network attached.
-    Nither it can communicate with the internal containers nor it can communicate with the external world.
+    Neither it can communicate with the internal containers nor it can communicate with the external world.
 
 ```sh
 `docker run ubuntu` #containers are running in the bridge network
@@ -238,7 +246,7 @@ Docker file are used to create docker image.
 - this layer architecture can be viewed by using `docker history` command.
 - this layered architecture helps in caching the steps, and reusing if it is required in future.
 
-## What can you containerise
+## What can you containerize
 
 - everything. chrome, Skype, spotify etc.
 - installation is not required and cleanup is pretty easy.
