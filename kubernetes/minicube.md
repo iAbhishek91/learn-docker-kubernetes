@@ -4,6 +4,8 @@ This allows to run K8s cluster on one host.
 
 ## Below are the warning messages
 
+minikube start --vm-driver=none
+
 1. [WARNING Firewalld]: firewalld is active, please ensure ports [8443 10250] are open or your cluster may not function correctly
 2. [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
 3. [WARNING Swap]: running with swap on is not supported. Please disable swap
@@ -92,3 +94,118 @@ minikube v1.7.2 on Centos 7.7.1908
 #### Notes
 
 Once the kubernetes cluster is created using minicube, `minicube start` command creates  a kubectl context called minicube. This context contains the configuration to communicate with your Minikube cluster.
+
+### Running application in minicube
+
+before starting, ensure kubernetes cluster is running properly
+
+```sh
+kubectl cluster-info
+
+# OUTPUT
+# Kubernetes master is running at https://192.168.1.248:8443
+# KubeDNS is running at https://192.168.1.248:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+```
+
+Deploying a node.js app
+
+```sh
+kubectl run abdas81 --image=abdas81/temperature-service --port=1313 --generator=run/v1 # use run-pod/v1 now
+
+# OUTPUT
+# replicationcontroller/abdas81 created
+```
+
+List the pods that were created
+
+```sh
+kubectl get pods
+
+# OUTPUT (image is not available will give below errors ErrImagePull or ImagePullBackOff)
+# NAME          READY   STATUS         RESTARTS   AGE
+# kubia-7hzsz   0/1     ErrImagePull   0          2m
+
+# NAME          READY   STATUS             RESTARTS   AGE
+# kubia-7hzsz   0/1     ImagePullBackOff   0          23m
+```
+
+#### Notes
+
+name space analysis when k8s is running.
+
+Nproc is number of processing units available.
+
+```sh
+lsns
+
+# OUTPUT
+# master (etcd(conf key value store), api server, scheduler, controller-manager(function on the cluster))
+# NAMESPACE TYPE    NPROCS PID USER     COMMAND
+#4026532211 mnt        1   876 root     kube-controller-manager --authentication-kubeconfig=/etc/kubernetes/controller-manager.conf --authorization-kubeconfig=
+#4026532212 pid        1   876 root     kube-controller-manager --authentication-kubeconfig=/etc/kubernetes/controller-manager.conf --authorization-kubeconfig=
+#4026532213 mnt        1   920 root     etcd --advertise-client-urls=https://192.168.1.248:2379 --cert-file=/var/lib/minikube/certs/etcd/server.crt --client-ce
+#4026532214 pid        1   920 root     etcd --advertise-client-urls=https://192.168.1.248:2379 --cert-file=/var/lib/minikube/certs/etcd/server.crt --client-ce
+#4026532215 mnt        1   921 root     kube-apiserver --advertise-address=192.168.1.248 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-fil
+#4026532216 pid        1   921 root     kube-apiserver --advertise-address=192.168.1.248 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-fil
+#4026532217 mnt        1   923 root     kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/sc
+#4026532218 pid        1   923 root     kube-scheduler --authentication-kubeconfig=/etc/kubernetes/scheduler.conf --authorization-kubeconfig=/etc/kubernetes/sc
+
+# Kube proxy()
+#4026532223 mnt        1  1582 root     /usr/local/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-override=osboxes
+#4026532224 pid        1  1582 root     /usr/local/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-override=osboxes
+
+# This is for container running (abdas81/temperature-service)
+#4026532747 mnt        1 13193 root     node dist/server/
+#4026532748 uts        1 13193 root     node dist/server/
+#4026532749 pid        1 13193 root     node dist/server/
+```
+
+```sh
+netstat -p
+
+# OUTPUT
+#tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1494/master
+#tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      1260/kubelet
+#tcp        0      0 127.0.0.1:44328         0.0.0.0:*               LISTEN      1260/kubelet
+#tcp        0      0 127.0.0.1:10249         0.0.0.0:*               LISTEN      1582/kube-proxy
+#tcp        0      0 192.168.1.248:2379      0.0.0.0:*               LISTEN      920/etcd
+#tcp        0      0 127.0.0.1:2379          0.0.0.0:*               LISTEN      920/etcd
+#tcp        0      0 192.168.1.248:2380      0.0.0.0:*               LISTEN      920/etcd
+#tcp        0      0 127.0.0.1:2381          0.0.0.0:*               LISTEN      920/etcd
+#tcp        0      0 127.0.0.1:10257         0.0.0.0:*               LISTEN      876/kube-controller
+#tcp        0      0 127.0.0.1:10259         0.0.0.0:*               LISTEN      923/kube-scheduler
+#tcp6       0      0 ::1:25                  :::*                    LISTEN      1494/master
+#tcp6       0      0 :::8443                 :::*                    LISTEN      921/kube-apiserver
+#tcp6       0      0 :::10250                :::*                    LISTEN      1260/kubelet
+#tcp6       0      0 :::10251                :::*                    LISTEN      923/kube-scheduler
+#tcp6       0      0 :::10252                :::*                    LISTEN      876/kube-controller
+#tcp6       0      0 :::10256                :::*                    LISTEN      1582/kube-proxy
+```
+
+```sh
+kubectl get pods -o wide
+
+# OUTPUT
+#NAME            READY   STATUS    RESTARTS   AGE     IP           NODE      NOMINATED NODE   READINESS GATES
+#abdas81-gg6nt   1/1     Running   0          5h20m   172.17.0.6   osboxes   <none>           <none>
+```
+
+Couple of things to note from the above command's o/p:
+
+- that 172.17.x.x network is not exposed on host system from netstat (where pod is running), this is internal network and hence cant be accessed from outside.
+- also, PID 13193, is not listed in netstat, hence there is no active TCP network connection available.
+- all the k8s component is running in local host as we are running with minicube and vm-option is none.
+
+```sh
+kubectl expose rc abdas81 --type=LoadBalancer --name abdas81-http # this command will create the service, however since minicube do not support load balancer external IP will be expose
+
+kubectl get services
+
+# OUTPUT
+# NAME           TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+# abdas81-http   LoadBalancer   10.100.67.165   <pending>     1313:31712/TCP   17m
+# kubernetes     ClusterIP      10.96.0.1       <none>        443/TCP          16h
+
+minikube service abdas81-http # this will throw error as minicube try to open the service in the pod in a web browser, and in many VM mozilla maynot be installed
+curl 192.168.1.248:31712/api/v1/weather -H "longitude: 90" -H "latitude:50"
+```

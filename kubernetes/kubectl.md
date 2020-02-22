@@ -36,6 +36,14 @@ get info about nodes: **kubectl get nodes**
 
 get info about replication controller: **kubectl get replicationcontroller**
 
+```sh
+kubectl get replicationcontroller -o wide
+
+# OUTPUT
+# NAME    DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES        SELECTOR
+# kubia   1         1         0       53m   kubia        luska/kubia   run=kubia
+```
+
 get info about replica set: **kubectl get replicaset**
 
 get info about deployment: **kubectl get deployments**
@@ -49,6 +57,30 @@ get detail information about pods **kubectl describe pods**
 ## kubectl delete
 
 delete already running deployment **kubectl delete deployment nginx**
+
+```sh
+kubectl delete pod kubia-7hzsz
+
+# pod "kubia-7hzsz" deleted
+```
+
+> Important Note: When you delete a pod using the above command, automatically immediately a pod is created by Kubernetes scheduler. Hence you really cant delete a pod. use the below command for that
+
+```sh
+kubectl get nodes # get the node name
+
+# OUTPUT
+# NAME      STATUS   ROLES    AGE    VERSION
+# osboxes   Ready    master   176m   v1.17.2
+kubectl get pods -o wide | grep <nodename> # get all the pods from a specific node, check the pod that you want to delete
+
+# OUTPUT
+# kubia-6bvfx   0/1     ImagePullBackOff   0          11m   172.17.0.6   osboxes   <none>           <none>
+kubectl cordon <node-name> # set the node to be unschedulable
+
+# OUTPUT
+# node/osboxes cordoned
+```
 
 ## kubectl cluster-info
 
