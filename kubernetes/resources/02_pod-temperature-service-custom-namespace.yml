@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-temperature-service
+  namespace: my-namespace
+spec:
+  containers:
+    - image: abdas81/temperature-service
+      name: container-temerature-service
+      ports:
+        - containerPort: 1313
+          protocol: TCP

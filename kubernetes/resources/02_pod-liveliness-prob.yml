@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-liveness
+spec:
+  containers:
+    - image: abdas81/mock-http-req-status:3p
+      name: container-liveness
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 1221

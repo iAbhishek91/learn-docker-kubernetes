@@ -1,4 +1,4 @@
-# minicube
+# minikube
 
 This allows to run K8s cluster on one host.
 
@@ -15,7 +15,7 @@ minikube start --vm-driver=none
 
 **No Action for 1**: firewalld service runs in one system. verify, `firewall-cmd --list-all` this command will give if 8443 and 10250 is blocked. Incase its blocked open the firewall rules.
 
-Also once minicube starts you can verify `netstat -tulp` that all the service of kubernetes is running or not. For me, I can see below processes after minicube starts:
+Also once minikube starts you can verify `netstat -tulp` that all the service of kubernetes is running or not. For me, I can see below processes after minikube starts:
 
 tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1494/master
 tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      1260/kubelet
@@ -34,7 +34,7 @@ tcp6       0      0 :::10256                :::*                    LISTEN      
 
 When systemd is chosen as the init system for a Linux distribution, the init process generates and consumes a root control group (cgroup) and acts as a cgroup manager. Systemd has a tight integration with cgroups and will allocate cgroups per process. cgroupfs is the default cgroup manager for docker. It’s possible to configure your container runtime and the kubelet to use cgroupfs. Using cgroupfs alongside systemd means that there will then be two different cgroup managers.
 
-Since cggroup are used to restrict resources per process, one cggroup manager will simplify the resource management.
+Since cgroup are used to restrict resources per process, one cgroup manager will simplify the resource management.
 
 Across the cluster cgroup manager should be consistent (kubelet, docker and other processes)
 
@@ -93,9 +93,9 @@ minikube v1.7.2 on Centos 7.7.1908
 
 #### Notes
 
-Once the kubernetes cluster is created using minicube, `minicube start` command creates  a kubectl context called minicube. This context contains the configuration to communicate with your Minikube cluster.
+Once the kubernetes cluster is created using minikube, `minikube start` command creates  a kubectl context called minikube. This context contains the configuration to communicate with your Minikube cluster.
 
-### Running application in minicube
+### Running application in minikube
 
 before starting, ensure kubernetes cluster is running properly
 
@@ -110,7 +110,7 @@ kubectl cluster-info
 Deploying a node.js app
 
 ```sh
-kubectl run abdas81 --image=abdas81/temperature-service --port=1313 --generator=run/v1 # use run-pod/v1 now
+kubectl run abdas81 --image=abdas81/temperature-service --port=1313 --generator=run/v1 # use run-pod/v1 now to run a pod manually
 
 # OUTPUT
 # replicationcontroller/abdas81 created
@@ -194,10 +194,14 @@ Couple of things to note from the above command's o/p:
 
 - that 172.17.x.x network is not exposed on host system from netstat (where pod is running), this is internal network and hence cant be accessed from outside.
 - also, PID 13193, is not listed in netstat, hence there is no active TCP network connection available.
-- all the k8s component is running in local host as we are running with minicube and vm-option is none.
+- all the k8s component is running in local host as we are running with minikube and vm-option is none.
 
 ```sh
-kubectl expose rc abdas81 --type=LoadBalancer --name abdas81-http # this command will create the service, however since minicube do not support load balancer external IP will be expose
+kubectl expose rc abdas81 --type=LoadBalancer --name abdas81-http # this command will create the service, however since minikube do not support load balancer external IP will be expose, see next step
+
+# very important to note, why a service is required?
+# POD run your application and exposes that to a port. However pod are shifted from one node to another. Also it may be recreated by replication controller. Also there may be a situation where you have multiple replicas of a pod each having multiple ip. So IP is never constants. Hence service is required, which provide a static IP to a user and internally connects to replication contoller to connect to the pod(s).
+
 
 kubectl get services
 
@@ -206,6 +210,37 @@ kubectl get services
 # abdas81-http   LoadBalancer   10.100.67.165   <pending>     1313:31712/TCP   17m
 # kubernetes     ClusterIP      10.96.0.1       <none>        443/TCP          16h
 
-minikube service abdas81-http # this will throw error as minicube try to open the service in the pod in a web browser, and in many VM mozilla maynot be installed
+minikube service abdas81-http
+
+# OUTPUT
+# |-----------|--------------|-------------|----------------------------|
+# | NAMESPACE |     NAME     | TARGET PORT |            URL             |
+# |-----------|--------------|-------------|----------------------------|
+# | default   | abdas81-http |             | http://192.168.1.248:31712 |
+# |-----------|--------------|-------------|----------------------------|
+# 🎉  Opening service default/abdas81-http in default browser...
+# START /usr/bin/firefox "http://192.168.1.248:31712"
+# Failed to open connection to "session" message bus: Unable to autolaunch a dbus-daemon without a $DISPLAY for X11
+# Running without a11y support!
+# Running Firefox as root in a regular user's session is not supported.  ($XDG_RUNTIME_DIR is /run/user/1001 which is owned by abhishek.)
+# xdg-open: no method available for opening 'http://192.168.1.248:31712'
+#
+# 💣  open url failed: http://192.168.1.248:31712: exit status 3
+#
+# 😿  minikube is exiting due to an error. If the above message is not useful, open an issue:
+# 👉  https://github.com/kubernetes/minikube/issues/new/choose
+
+# this will throw error as minikube try to open the service in the pod in a web browser, and in many VM mozilla maynot be installed
+# However, take the IP from the service.
+
 curl 192.168.1.248:31712/api/v1/weather -H "longitude: 90" -H "latitude:50"
+
+# OUTPUT
+# {"temperature":5,"humidity":6}
+```
+
+Now we can scale an application very easily.
+
+```sh
+kubectl scale rc abdas81 --replicas=3
 ```
