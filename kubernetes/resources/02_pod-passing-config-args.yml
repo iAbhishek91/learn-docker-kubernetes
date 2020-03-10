@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-passing-config-args
+  labels:
+    author: abhishek 
+spec:
+  containers:
+    - image: abdas81/mock-http-req-status:args
+      name: passing-args-container
+      args: ["10"]

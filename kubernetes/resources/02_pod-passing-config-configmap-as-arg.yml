@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-passing-config-map-as-arg
+spec:
+  containers:
+    - image: abdas81/mock-http-req-status:args
+      name: container-passing-config-map-as-arg
+      env:
+        - name: NUMBER_OF_200
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-for-cluster
+              key: NUMBER_OF_200
+      args: ["${NUMBER_OF_200}"]

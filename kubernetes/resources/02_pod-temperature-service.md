@@ -24,6 +24,7 @@ we cant test this pod as this are not exposed by any service. However, K8s has a
 
 ```sh
 k port-forward pod-temperature-service 1314:1313
+# pod-temperature-service is the name of the pod
 ```
 
 > NOTE: In case socat is not installed, use yum install socat

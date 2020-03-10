@@ -1,0 +1,1 @@
+k create configMap my-config --from-file=volume-configMap

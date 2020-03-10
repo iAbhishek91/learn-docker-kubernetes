@@ -1,0 +1,10 @@
+server {
+  listen             80;
+  server_name        www.abhi-nginx-example.com;
+  gzip               on;
+  gzip_type          text/plain application/xml;
+  location / {
+    root      /usr/share/nginx/html;
+    index     index.html   index.htm
+  }
+}

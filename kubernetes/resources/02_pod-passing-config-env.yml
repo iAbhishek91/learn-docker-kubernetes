@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-passing-config-env
+spec:
+  containers:
+  - image: abdas81/mock-http-req-status:env
+    name: container-passing-cofig-env
+    env:
+      - name: NUMBER_OF_200
+        value: "20"
+    livenessProbe:
+        httpGet:
+          path: /
+          port: 1221
