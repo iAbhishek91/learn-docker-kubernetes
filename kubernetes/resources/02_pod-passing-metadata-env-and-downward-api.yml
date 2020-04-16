@@ -1,14 +1,26 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-passing-metadata-env
+  name: pod-passing-metadata-downward-volume
+  labels:
+    author: AbhishekDas
+    position: DevOpsEngineer
+  annotations:
+    objective-1: single line annotation
+    objective-2: |
+      multiple
+      line
+      annotation
 spec:
   containers:
   - image: abdas81/k8s-metadata
-    name: container-passing-metadata-env
+    name: container-passing-metadata-downward-volume
     ports:
     - containerPort: 1222
       protocol: TCP
+    volumeMounts:
+    - name: downward
+      mountPath: /etc/downward
     env:
     - name: POD_NAME
       valueFrom:
@@ -30,3 +42,13 @@ spec:
       valueFrom:
         fieldRef:
           fieldPath: spec.nodeName
+  volumes:
+  - name: downward
+    downwardAPI:
+      items:
+      - path: labels
+        fieldRef:
+          fieldPath: metadata.labels
+      - path: annotations
+        fieldRef:
+         fieldPath: metadata.annotations

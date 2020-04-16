@@ -2,17 +2,18 @@
 
 This allows to run K8s cluster on one host.
 
-## Below are the warning messages
+## Start minikube (warning message)
 
+```sh
 minikube start --vm-driver=none
 
-1. [WARNING Firewalld]: firewalld is active, please ensure ports [8443 10250] are open or your cluster may not function correctly
-2. [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
-3. [WARNING Swap]: running with swap on is not supported. Please disable swap
-4. [WARNING FileExisting-socat]: socat not found in system path
-5. [WARNING Service-Kubelet]: kubelet service is not enabled, please run 'systemctl enable kubelet.service'
-6. [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1
-
+#1. [WARNING Firewalld]: firewalld is active, please ensure ports [8443 10250] are open or your cluster may not function correctly
+#2. [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+#3. [WARNING Swap]: running with swap on is not supported. Please disable swap
+#4. [WARNING FileExisting-socat]: socat not found in system path
+#5. [WARNING Service-Kubelet]: kubelet service is not enabled, please run 'systemctl enable kubelet.service'
+#6. [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1
+```
 **No Action for 1**: firewalld service runs in one system. verify, `firewall-cmd --list-all` this command will give if 8443 and 10250 is blocked. Incase its blocked open the firewall rules.
 
 Also once minikube starts you can verify `netstat -tulp` that all the service of kubernetes is running or not. For me, I can see below processes after minikube starts:
@@ -47,6 +48,9 @@ Swap is not handled by kubernetes. Kubelet isn't designed to handle swap situati
 Swap device and files `cat /proc/swaps`.
 
 `swapoff -av`
+
+to permanently switchoff swap we need to remove(or comment) the swap line from /etc/fstab.
+`swapoff -av && sed -i '/ swap / s/^/#/' /etc/fstab` can use this command.
 
 **Optional Action for 4**
 
@@ -243,4 +247,40 @@ Now we can scale an application very easily.
 
 ```sh
 kubectl scale rc abdas81 --replicas=3
+```
+
+## stop minikube cluster
+
+```sh
+minikube stop
+```
+
+### debugging with minikube
+
+```sh
+minikube addons list
+
+# default OUTPUT
+#|-----------------------------|----------|--------------|
+#|         ADDON NAME          | PROFILE  |    STATUS    |
+#|-----------------------------|----------|--------------|
+#| dashboard                   | minikube | enabled ✅   |
+#| default-storageclass        | minikube | enabled ✅   |
+#| efk                         | minikube | disabled     |
+#| freshpod                    | minikube | disabled     |
+#| gvisor                      | minikube | disabled     |
+#| helm-tiller                 | minikube | disabled     |
+#| ingress                     | minikube | disabled     |
+#| ingress-dns                 | minikube | disabled     |
+#| istio                       | minikube | disabled     |
+#| istio-provisioner           | minikube | disabled     |
+#| logviewer                   | minikube | disabled     |
+#| metrics-server              | minikube | disabled     |
+#| nvidia-driver-installer     | minikube | disabled     |
+#| nvidia-gpu-device-plugin    | minikube | disabled     |
+#| registry                    | minikube | disabled     |
+#| registry-creds              | minikube | disabled     |
+#| storage-provisioner         | minikube | enabled ✅   |
+#| storage-provisioner-gluster | minikube | disabled     |
+#|-----------------------------|----------|--------------|
 ```
