@@ -1,5 +1,36 @@
 # kubeadm
 
+## Node configuration
+
+After minikube this is the second cluster we are setting up. Note that in minikube we only had one node. However, in this scenario we have one master and multiple worker node.
+
+Everything in minikube node configuration remains same. Apart from those configuration multi node cluster requires few more settings:
+
+1. Make sure *MAC address is unique* for all the nodes. Mostly in VMs we face this issue.
+2. Make sure your *VMs are direct clone*, and not linked cloned.
+3. Make sure */sys/class/dmi/id/product_uuid is unique*. MAC address and product_uuid is used by k8s to distinguish different node.
+4. *Adding kubernetes yum repo* at /etc/yum.repo.d/kubernetes.repo. Content of this file can be taken from kubernetes.io.
+5. *br_netfilter should be active*. verify using `lsmod | grep br_netfilter`. Enable it `modprobe br_netfilter`.
+6. Network configuration to make sure Kubernetes service is working properly
+
+```sh
+cat <<EOF > /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system
+```
+
+> Note for all the above step refer Kubernetes in action -Appendix B.
+
+## Component to be installed
+
+```sh
+yum install -y docker kubelet kubectl kubeadm kubernetes-cni
+```
+
+> NOTE: Reason of installing all the above packages are detailed in Appendix-B of kubernetes in action.
+
 ## kubeadm init
 
 ```sh
@@ -96,4 +127,101 @@ total 24
 4 -rw-------. 1 root root 1120 Apr 16 19:09 kube-scheduler.yaml
 4 -rw-------. 1 root root 2709 Apr 16 19:09 kube-apiserver.yaml
 4 drwxr-xr-x. 4 root root 4096 Apr 16 19:09 ..
+```
+
+## Kubectl config and list pods and nodes
+
+```sh
+[root@master osboxes]# echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> ~/.bashrc
+[root@master osboxes]# echo "alias k='kubectl'" >> ~/.bashrc
+[root@master osboxes]# source ~/.bashrc
+[root@master osboxes]# k get pods --all-namespaces
+NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE
+kube-system   coredns-66bff467f8-5vmqm             0/1     Pending   0          7h
+kube-system   coredns-66bff467f8-9nvns             0/1     Pending   0          7h
+kube-system   etcd-master.k8s                      1/1     Running   1          7h
+kube-system   kube-apiserver-master.k8s            1/1     Running   1          7h
+kube-system   kube-controller-manager-master.k8s   1/1     Running   1          7h
+kube-system   kube-proxy-rw2zp                     1/1     Running   1          7h
+kube-system   kube-scheduler-master.k8s            1/1     Running   1          7h
+[root@master osboxes]# k get nodes
+NAME         STATUS     ROLES    AGE    VERSION
+master.k8s   NotReady   master   7h3m   v1.18.1
+```
+
+## Worker node
+
+kubeadm join on both the worker nodes.
+
+```sh
+[root@node1 osboxes]# kubeadm join 192.168.1.158:6443 --token ugbltx.ukgawau0c5209b95 \
+>     --discovery-token-ca-cert-hash sha256:6951e7437c5bac9828d1b771057795d172778cc7eb6bab44c29463e48c8a601f
+W0417 02:24:27.289064   12074 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set.
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.18" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+[root@node2 osboxes]# kubeadm join 192.168.1.158:6443 --token ugbltx.ukgawau0c5209b95 \
+>     --discovery-token-ca-cert-hash sha256:6951e7437c5bac9828d1b771057795d172778cc7eb6bab44c29463e48c8a601f
+W0417 02:25:57.972958   12165 join.go:346] [preflight] WARNING: JoinControlPane.controlPlane settings will be ignored when control-plane flag is not set.
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.18" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Starting the kubelet
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+[root@master osboxes]# k get nodes
+NAME         STATUS     ROLES    AGE     VERSION
+master.k8s   NotReady   master   7h17m   v1.18.1
+node1.k8s    NotReady   <none>   3m22s   v1.18.1
+node2.k8s    NotReady   <none>   118s    v1.18.1
+```
+
+### Nodes are not ready
+
+In the above section we saw the none of the nodes are ready.
+
+```sh
+[root@master osboxes]# k describe nodes node1.k8s 
+Conditions:
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  MemoryPressure   False   Fri, 17 Apr 2020 02:45:12 -0400   Fri, 17 Apr 2020 02:24:41 -0400   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Fri, 17 Apr 2020 02:45:12 -0400   Fri, 17 Apr 2020 02:24:41 -0400   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Fri, 17 Apr 2020 02:45:12 -0400   Fri, 17 Apr 2020 02:24:41 -0400   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            False   Fri, 17 Apr 2020 02:45:12 -0400   Fri, 17 Apr 2020 02:24:41 -0400   KubeletNotReady              runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:docker: network plugin is not ready: cni config uninitialized
+```
+
+This is because K8s CNI plugin is not deployed yet.
+
+## Deploying kubernetes CNI plugin
+
+> NOTE we need to install kubernetes-cni which we have already done on all the nodes.
+
+```sh
+[root@master osboxes]# kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+serviceaccount/weave-net created
+clusterrole.rbac.authorization.k8s.io/weave-net created
+clusterrolebinding.rbac.authorization.k8s.io/weave-net created
+role.rbac.authorization.k8s.io/weave-net created
+rolebinding.rbac.authorization.k8s.io/weave-net created
+daemonset.apps/weave-net created
 ```

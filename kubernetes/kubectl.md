@@ -2,17 +2,16 @@
 
 ## kubectl api-resources
 
-Lists all resources of kubectl.
+Lists all resources of **kubectl api-resources**.
 
 Important to note some common thing about k8s resources:
 
-- some resources falls under a names space, some do not.
+- some resources falls under a names space, some do not. Pods are, but certificatesigningrequests are not.
 - All resources end with "s" (plural) and are in small letter. eg pods, services, certificatesigningrequests.
-- Few resources are namespaced few are not. Pods are, but certificatesigningrequests are not.
 
 ## kubectl cluster info
 
-displays the description of cluster. **kubectl cluster-info --help**, **kubectl cluster-info dump**, **kubectl cluster-info --help**
+displays the description of cluster. **kubectl cluster-info dump**, **kubectl cluster-info --help**
 
 ```sh
 kubectl cluster-info
@@ -24,9 +23,11 @@ kubectl cluster-info
 
 ## kubectl create
 
-This cretes a pod/replicaset/ replica controller/deployment/services based on the `kind` attribute in the kubernetes object(the yml file): **kubectl create -f pod-definition.yaml**
+This cretes a resource based on the `kind` attribute in the kubernetes object(the yml or json file): **kubectl create -f pod-definition.yaml**
 
-## kubectl run hello-minikube
+## kubectl run
+
+Create and run a particular image.
 
 basic run command syntax **kubectl run `<podname>` --image `<container-name>`**
 
