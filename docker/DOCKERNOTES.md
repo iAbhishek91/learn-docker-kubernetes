@@ -17,7 +17,7 @@ This problem is mainly solved by docker.
 When we install docker we install three different component on your host(linux host to be specific):
 
 - **Docker daemon**: this is a background process which manages networks, volumes and docker images, containers.
-- **Rest API**: is a exposed layer which can communicate with the daemon and provide instruction to be executed. Engineers can use this to create their own tools.
+- **Rest API**: also known as docker API. is a exposed layer which can communicate with the daemon and provide instruction to be executed. Engineers can use this to create their own tools.
 - **Docker CLI**: Command line tool which are used to run commands that we have seen. Docker cli under the hood uses the rest-apis to communicate with the docker daemon.
 
 These three component together known as Docker Cli.

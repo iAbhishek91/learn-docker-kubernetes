@@ -6,12 +6,12 @@ After minikube this is the second cluster we are setting up. Note that in miniku
 
 Everything in minikube node configuration remains same. Apart from those configuration multi node cluster requires few more settings:
 
-1. Make sure *MAC address is unique* for all the nodes. Mostly in VMs we face this issue.
-2. Make sure your *VMs are direct clone*, and not linked cloned.
-3. Make sure */sys/class/dmi/id/product_uuid is unique*. MAC address and product_uuid is used by k8s to distinguish different node.
-4. *Adding kubernetes yum repo* at /etc/yum.repo.d/kubernetes.repo. Content of this file can be taken from kubernetes.io.
-5. *br_netfilter should be active*. verify using `lsmod | grep br_netfilter`. Enable it `modprobe br_netfilter`.
-6. Network configuration to make sure Kubernetes service is working properly
+**Step-1.** Make sure *MAC address is unique* for all the nodes. Mostly in VMs we face this issue.
+**Step-2.** Make sure your *VMs are direct clone*, and not linked cloned.
+**Step-3.** Make sure */sys/class/dmi/id/product_uuid is unique*. MAC address and product_uuid is used by k8s to distinguish different node.
+**Step-4.** *Adding kubernetes yum repo* at */etc/yum.repo.d/kubernetes.repo*. Content of this file can be taken from kubernetes.io.
+**Step-5.** *br_netfilter should be active*. verify using `lsmod | grep br_netfilter`. Enable it `modprobe br_netfilter`.
+**Step-6.** Network configuration to make sure Kubernetes service is working properly
 
 ```sh
 cat <<EOF > /etc/sysctl.d/k8s.conf
