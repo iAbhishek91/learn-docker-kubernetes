@@ -5,6 +5,45 @@
 **k run** /resources/docs/01_pod.md
 **k logs** /resources/docs/01_pod.md
 **k port-forward** /resources/docs/01_pod.md
+**k rollout** /resource/docs/06_deployment.md
+
+---
+
+Defined in this page
+
+**k completion**,
+**k version**,
+**k option**,
+**k api-resources**,
+**k api-version**,
+**k config**,
+**k explain**,
+**k cluster-info**,
+**k create**,
+**k edit**,
+**k apply**,
+**k replace**,
+**k get**,
+**k describe**,
+**k delete**,
+**k coredon**,
+**k uncoredon**,
+
+## k completion
+
+```sh
+#auto completion of kubectl command in bash or zsh
+source <(kubectl completion bash | sed s/kubectl/k/g)
+```
+
+## k version
+
+display the version of kubernetes running on client and server **k version** or **k version --client**
+> Note its not version of kubernetes.
+
+## k option
+
+display global options that can be passed to any *k* commands.
 
 ## k api-resources
 
@@ -14,6 +53,16 @@ Important to note some common thing about k8s resources:
 
 - some resources falls under a names space, some do not. Pods are, but certificatesigningrequests are not.
 - All resources end with "s" (plural) and are in small letter. eg pods, services, certificatesigningrequests.
+
+## k api-version
+
+lists all the api-version available in group/version version.
+
+**k api-version**.
+
+## k config
+
+TBD
 
 ## k explain
 
@@ -48,6 +97,10 @@ dump will give massive details about the cluster.
 
 This creates a resource based on the `kind` attribute in the kubernetes object(the yml or json file):
 
+**POST call**, where as apply makes a **PUT call**(PUT is idempotent) to the API server.  
+
+its always better to --validate && --dry-run && -o yaml
+
 ```sh
 # create a resource from a file
 k create -f pod-definition.yaml
@@ -57,6 +110,45 @@ cat pod.json | k create -f -
 k create -f pod-def.yaml --dry-run='client'
 #  validate before running, by default its set to true
 k create -f pod-def.yml --validate
+# create clusterrole --dryrun
+k create clusterrole system:kube-apiserver-to-kubelet --dry-run=true --verb="*" --resource=node/proxy,nodes/stats,node/log,nodes/spec,node/metrices --validate=true -o yaml > generated_clusterrole.yml
+# create a clusterrolebinding using the above cluster role
+k create clusterrolebinding system:kube-apiserver --dry-run=true --validate=true --clusterrole=system:kube-apiserver-to-kubelet --user=kubenetes -o yaml
+# create config map
+k create configmap my-config-map --from-literal=firstname=abhishek --from-file=/path/to/the/file/or/dir
+# create a secret: its similar to config map, but secret type is to be mentioned
+k create secret generic my-secret --from...... same as above
+
+```
+
+> k create do nor provide generator is not available for pod. use k run my-pod --image=abdas81/k8s-metadata
+
+## k edit
+
+It all will update the resource in  a open window, and then automatically it will delete and create the pod again.
+
+```sh
+k edit po standalone-pod
+```
+
+## k apply
+
+**PUT call**(PUT is idempotent), where as create makes a **POST call** to the API server.
+
+Apply will not work if dynamic update of the filed is not allowed, this is mainly because, apply do not delete the existing deployment.
+
+Almost same syntax like create
+
+```sh
+k apply -f pod.yml --dry-run=client --validate -o yaml
+```
+
+## k replace
+
+same edit the file and the do replace
+
+```sh
+k replace -f rs.yaml
 ```
 
 ## k get
@@ -64,6 +156,13 @@ k create -f pod-def.yml --validate
 help of any k8s option **k get -h**
 
 Display one or many resources.
+
+Watch event for a specific node
+
+```sh
+k get all
+k get events --watch -n jenkins
+```
 
 get info about everything: **k get all --all-namespaces| -A**
 
@@ -149,8 +248,13 @@ delete already running deployment **k delete deployment nginx**
 
 ```sh
 k delete pod kubia-7hzsz
-
 # pod "kubia-7hzsz" deleted
+
+k delete po --all -n default
+# delete all the pod from the namespace
+
+k delete namespaces jenkins
+# namespace "jenkins" deleted
 ```
 
 > Important Note: When you delete a pod using the above command, automatically immediately a pod is created by Kubernetes scheduler. Hence you really cant delete a pod (if not created manually)
@@ -162,7 +266,11 @@ k get nodes # get the node name
 # NAME      STATUS   ROLES    AGE    VERSION
 # osboxes   Ready    master   176m   v1.17.2
 k get pods -o wide | grep <nodename> # get all the pods from a specific node, check the pod that you want to delete
+```
 
+## k cordon
+
+```sh
 # OUTPUT
 # kubia-6bvfx   0/1     ImagePullBackOff   0          11m   172.17.0.6   osboxes   <none>           <none>
 k cordon <node-name> # set the node to be unschedulable
@@ -180,3 +288,29 @@ Written by me to find pod and containers inside a kubernetes cluster
 ```sh
 k get pods --all-namespaces -o jsonpath="{range.items[*]}[{.metadata.name},{.spec.containers[*].image}]" | tr -s '][' '\n' | tr -s ',' '\t\t\t' | sort
 ```
+
+## imp command
+
+```sh
+k run nginx --image=nginx --generator=run-pod/v1
+
+k delete po --all
+
+k delete rs replicaset-1 replicaset-2
+
+k scale rs new-replica-set --replicas=5
+k scale deploy deployment-1 --replicas=3
+
+# FAIL: --replicas is not there in create command
+k create deploy deployment-1 --image=busybox --replicas=3
+
+# should be string
+commands:
+  - "sleep"
+  - "5000"
+
+k create secret generic db-secret --from-literal=DB-HOST=sql01
+```
+
+service at own namespace can be accessed with name of the service and port
+service at diff namespace can be accessed with "servicename.svc.cluster.local"

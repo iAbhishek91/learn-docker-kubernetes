@@ -77,6 +77,24 @@ spec:
       image: ngnix
 ```
 
+### pod life cycle
+
+**Pending** >> (after is it is scheduled) >> **ContainerCreating** >> (containers starts) >> **Running** (all containers are running) || **waiting**(if nor running ot terminated) || **terminated** (can be due to success or failure)
+
+- *Succeeded* (all container stopped successfully)
+- *Failed* (all container stopped, but one is having error)
+
+**Unknown** (can come any time, mainly when communication breaks between the k8s component.)
+
+### pod condition
+
+Are Values that are saved, at each milestone. They have true or false.
+
+- **scheduled** once scheduler assigns a node.
+- **initialized** once all the init container is scheduled.
+- **containersReady** once all the containers are running.
+- **ready** at last the pod itself is ready.
+
 ## controller
 
 - they are brain of kubernetes.

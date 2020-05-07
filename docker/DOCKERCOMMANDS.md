@@ -24,6 +24,12 @@ docker pull ubuntu
 docker pull ubuntu:17.4
 ```
 
+specific registry
+
+```sh
+docker image docker-registry/abdas81/image-name
+```
+
 ## docker run
 
 - It runs a container from a docker image. If the image do not exists it will go out to the registry and download the docker image and then run it. This is only done for the first time, for subsequent execution the same image will be used.
@@ -148,6 +154,9 @@ docker run --link redis:redis image-dependent-require-redis
 
 ```sh
 docker inspect container-id
+
+# to get specific data (mount is a filed, and dot. is the root of the entire set)
+docker inspect -f '{{ .Mounts }}' etcd
 ```
 
 ## docker exec
@@ -160,6 +169,13 @@ docker inspect container-id
 docker exec my_container cat /etc/hosts
 ```
 
+## docker logs
+
+```sh
+docker log container-name
+docker log -f container-name # same as tail -f
+```
+
 ## docker ps
 
 - Without any option, it lists all the running container.
@@ -167,6 +183,8 @@ docker exec my_container cat /etc/hosts
 
 ```sh
 docker ps -a
+
+docker ps -a -f=name='kubelet|kube-proxy'
 ```
 
 ## docker stop
@@ -178,6 +196,7 @@ docker ps -a
 
 ```sh
 docker stop my-container
+docker container stop $(docker container ls -aq) # stop all running container.
 ```
 
 ## docker rm
@@ -201,12 +220,6 @@ docker rm 82 15 e4 57 de
 
 ```sh
 docker images
-```
-
-- remove images
-
-```sh
-docker images rm image_ids
 ```
 
 - remove dangling images, unused images (not linked with container)
@@ -252,6 +265,10 @@ docker rmi my-image
 
 ```sh
 docker rmi 5d 31 5h
+```
+
+```sh
+docker rmi $(docker images -q)
 ```
 
 ## docker build
@@ -403,4 +420,17 @@ This commands are mentioned in the note section
 
 ## docker node
 
-This commands are mentioned in the note section.
+This is related to docker swarm where node details are returned using this command. This commands are mentioned in the note section.
+
+## Important to combine the docker queries
+
+**-q** is important option can be used with all listing commands like *ps -qa*, *images -qa*, *volume ls -q*, *container ls -qa*.
+
+This can be combined with command like rm rmi, stop etc using the below syntax
+
+```sh
+docker stop $(docker ps -qa)
+docker rm $(docker container ls -qa)
+docker rmi $(docker images ls -qa)
+docker volume rm $(docker volume ls -q)
+```

@@ -60,7 +60,7 @@ systemctl disable firewalld && systemctl stop firewalld
 
 **Step-7**: Change the hostname, hosts file and network to use bridge so that separate IP is allocated to each vm.
 
-### Configure RKE
+### Install and Configure RKE
 
 Step-1: Installation of RKE is done on the local machine. In my case I am installing it on my Mac.
 
@@ -80,3 +80,43 @@ RKE uses a cluster configuration file, refereed to as cluster.yml to determine t
 
 - What node will be in the cluster
 - how to deploy and launch kubernetes
+
+```sh
+rke config --name kubernetes/cluster.yml
+```
+
+### Start the cluster
+
+Step-1: Make sure all the Virtual machine are working as expected.
+
+Step-2: bring up the cluster
+
+```sh
+rke up
+```
+
+## RKE functionality
+
+COMMANDS:
+     up       Bring the cluster up
+     remove   Teardown the cluster and clean cluster nodes
+     version  Show cluster Kubernetes version
+     config   Setup cluster configuration
+     etcd     etcd snapshot save/restore operations in k8s cluster
+     cert     Certificates management for RKE cluster
+     encrypt  Manage cluster encryption provider keys
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --debug, -d    Debug logging
+   --quiet, -q    Quiet mode, disables logging and only critical output will be printed
+   --trace        Trace logging
+   --help, -h     show help
+   --version, -v  print the version
+
+## RKE certificate management
+
+RKE saves its certificates in two place on the node where it is deploying.
+
+1. /etc/kubernetes/ssl/*
+2./opt/rke/etc/kubernetes/*

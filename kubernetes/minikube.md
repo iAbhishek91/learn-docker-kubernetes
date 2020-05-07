@@ -52,6 +52,9 @@ Swap device and files `cat /proc/swaps`.
 to permanently switchoff swap we need to remove(or comment) the swap line from /etc/fstab.
 `swapoff -av && sed -i '/ swap / s/^/#/' /etc/fstab` can use this command.
 
+verify using the below command (the command should not return anything)
+`swapon --show`
+
 **Optional Action for 4**
 
 socat stands for socket concatenation. This ia a utilities used to create two for bi-directional byte stream and transfer data between them.
