@@ -310,6 +310,8 @@ commands:
   - "5000"
 
 k create secret generic db-secret --from-literal=DB-HOST=sql01
+
+k set image deploy/frontend simple-webapp=kodekloud/webapp-color:v3
 ```
 
 service at own namespace can be accessed with name of the service and port

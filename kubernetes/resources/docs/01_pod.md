@@ -124,3 +124,145 @@ k port-forward svc/my_svc 8888:8080
 # forward port to mentioned ip address
 k port-forward --address localhost,10.19.21.23 my_pod 8888:8080
 ```
+
+## commands and argument
+
+Container runs only where there is a process running. This is the basis of keeping the container run.
+
+### Docker concept
+
+```Dockerfile
+# pass certain command to run in the container and then exit
+docker run ubuntu sleep 5
+
+# Embed the above command in image, to make it permanent.
+docker run ubuntu-sleeper
+# using CMD we can't append any more argument from the command line, thats the main diff b/w entrypoint and cmd.
+# Two syntax are available. in Second option (JSON array) the first option should be executable.
+CMD sleep 5
+CMD ["sleep", "5"]
+
+# now to make it more sophisticated, we want to pass the below command
+docker run ubuntu-sleep 5
+
+# Introducing Entry point in docker, the arguments get appended
+ENTRYPOINT sleep
+ENTRYPOINT ["sleep"]
+CMD 5
+
+# note entrypoint and cmd are best practice, else if you miss cmd and don't pass argument while running the container, then we will get err.
+# will sleep for 5 seconds, this is the default behavior of the image.
+docker run ubuntu-sleep
+# will sleep for 10 seconds, overwrite default value of CMD
+docker run ubuntu-sleep 10
+# to overwrite entry point use --entrypoint option, now it will execute sleep2.0 command with arg 20
+docker run --entrypoint sleep2.0 ubuntu-sleep 20
+```
+
+### k8s concept
+
+To achieve the above functionality in K8s.
+
+```yaml
+# replicate "docker run ubuntu-sleep 5"
+# args will override CMD in the image
+args: ["5"]
+
+# replicate "docker run --entrypoint sleep2.0 ubuntu-sleep 20"
+# args will override CMD in the image
+command: ["sleep2.0"]
+```
+
+## environment variable
+
+- always in name-value pair, but there are way to bring the value from somewhere else like config map or secrets
+- is a list (array)
+
+```yaml
+env:
+  - name:
+    value:
+```
+
+```yaml
+# bring value from configmap or secret
+env:
+  - name: FROM_CONFIG_MAP
+    valueFrom:
+      configMapKeyRef:
+        name:
+        key:
+  - name: FROM_SECRET
+    valueFrom:
+      secretKeyRef:
+```
+
+## config map
+
+- These are data that are managed centrally, instead of hard coding it in env variables
+- They are again key value pair in kubernetes
+
+### Creating a config map
+
+appConfig.properties
+
+```properties
+FIRST_NAME: abhishek
+LAST_NAME: das
+```
+
+```sh
+# config map
+k create cm|secret my-config|my-secret --from-literal=FIRST_NAME=abhishek --from-literal=LAST_NAME=das
+k create cm|secret my-config|my-secret --from-file=./appConfig.properties
+```
+
+```yaml
+apiVersion:
+kind: ConfigMap|Secret
+metadata:
+data:
+  FIRST_NAME: abhishek|asdfasdf
+  LAST_NAME: das|adsfadf
+```
+
+> NOTE: the values of secret should be echo -n 'passwd' | base64 || do decode echo -n 'adsfadf' | base --decode
+
+### using config map in pod
+
+There are several way of injecting config map|secret in pod
+
+- as environment variable
+- as single env var
+- as volume
+
+```yaml
+# as environment variable
+envFrom:
+  - configMapRef|secretRef:
+      name: name_of_the_configMap | name_of_the_secret
+# as single env var
+env:
+  - name: FIRST_NAME
+    valueFrom:
+      configMapKeyRef|secretKeyRef:
+        name: name_of_the_configMap | name_of_the_secret
+        key: FIRST_NAME
+# as volume
+spec:
+  containers:
+    - volumeMounts:
+       ....
+volumes:
+  - name: config_volume
+    configMap|volumes:
+      name|secretName: name_of_the_configMap
+```
+
+> When using volume, each every entry in the secret and config available as file.
+
+## secrets
+
+Concept and syntax is similar to config map. Only difference is that they content are base-64 encoded.
+
+so to make it easy I have kept the notes together (see above section)
