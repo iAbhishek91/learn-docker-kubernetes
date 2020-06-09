@@ -118,7 +118,7 @@ openssl req -new -key Jenkins.key -out jenkins.csr -subj “/CN=jenkins/O=lloyds
 openssl req -new -out san_domain_com.csr -key san_domain_com.key -config openssl.cnf
 
 #sign the CSR using the cluster CA
-openssl x509 -req -in jenkins.csr -CA /path/ca.crt -CAKey <(cat /path/ca.key) -CAcreateserial -out developer.crt -days 730
+openssl x509 -req -in jenkins.csr -CA /path/ca.crt -CAkey <(cat /path/ca.key) -CAcreateserial -out developer.crt -days 730
 # OR using config
 openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out etcd.crt -extensions v3_req -extfile etcd.cnf -days 100
 
@@ -155,4 +155,20 @@ k config set-credentials jenkins —client-certificate=/path/jenkins.crt —clie
 k config set-context Jenkins-context —cluster=kubernetes —namespaece=jenkins —user=jenkins
 
 # separate out tube config to separate out  
+{
+  kubectl config set-cluster abhishek-cka    --certificate-authority=ca.crt    --embed-certs=true \    --server=https:192.168.1.223//:6443 \
+    --kubeconfig=worker1.kubeconfig
+
+  kubectl config set-credentials system:node:worker01 \
+    --client-certificate=worker1.crt \
+    --client-key=worker1.key \
+    --embed-certs=true \
+    --kubeconfig=worker1.kubeconfig
+
+  kubectl config set-context default \
+    --cluster=abhishek-cka \
+    --user=system:node:worker01 \
+    --kubeconfig=worker1.kubeconfig
+
+  }
 ```

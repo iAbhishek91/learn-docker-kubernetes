@@ -32,6 +32,8 @@ k log my_pod --ignore_errors=true
 k logs --tail=20 --prefix --timestamps my_pod
 # recent 10 mints logs. valid values s, m, h.
 k logs my_pod --since=10m
+# previous instance
+k log my_pod -f --previous
 ```
 
 Containers logs are automatically rotated. Daily and every time the log file reaches 10MB in size. k logs only shows logs from the rotation. Logs are automatically deleted when a pod is deleted. To save the logs look at how to configure cluster wide logging system.

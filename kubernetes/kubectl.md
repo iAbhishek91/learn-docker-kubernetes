@@ -287,6 +287,21 @@ Written by me to find pod and containers inside a kubernetes cluster
 
 ```sh
 k get pods --all-namespaces -o jsonpath="{range.items[*]}[{.metadata.name},{.spec.containers[*].image}]" | tr -s '][' '\n' | tr -s ',' '\t\t\t' | sort
+
+
+k get pods --all-namespaces -o jsonpath="{range.items[*]}[{.metadata.name},{.spec.containers[*].image},{.status.podIP}]" | tr -s '][' '\n' | tr -s ',' '\t\t\t'| sort
+
+k get po -o jsonpath="{.status.containerStatuses[?(@.name == 'redis-container')].restartCount}"
+
+k get nodes -o jsonpath="{.items[*].metadata.name} {'\n'}"
+
+k config view --kubeconfig=/root/my-kube-config -o jsonpath={.users[*].name}
+
+k get pv --sort-by="{.spec.capacity.storage}"
+
+k get pv --sort-by="{.spec.capacity.storage}" -o custom-columns=NAME:.metadata.name,CAPACITY:.spec.capacity.storage
+
+k config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user =='aws-user')].name} {'\n'}"
 ```
 
 ## imp command

@@ -40,6 +40,7 @@ etcdctl member list \
 ```sh
 # cluster endpoints details in table format
 etcd -w table endpoint --cluster status
+ETCDCTL_API=3 etcdctl -w table endpoint health
 
 # cluster health
 etcdctl -w table endpoint --cluster health
