@@ -72,6 +72,19 @@ ports:
 * When simple is sent to server or received from server they should be idempotent or Optimistic concurrency.
 * Simple resource are often used to input alternate actions that modifies objects, hence resourceVersion of of simple resource should corresponds to resource version of the object.
 
+## Concurrency control
+
+Before that lets see what is **optimistic concurrency control** and **pessimistic concurrency control**.
+
+**Optimistic concurrency control** allow multiple transaction to update the same data with out actually locking the data, they uses version and timestamp for each data to determine the correctness of the data. This is useful when a system have lot of read operation and fewer write operation.
+
+**Pessimistic concurrency control** actually locks the data when one transaction is writing the data. In this case all the transaction need to wait until and unless the lock is removed.
+
+* **In Kubernetes** system we use optimistic concurrency control.
+* **Resource Versions (string)** under metadata section is used to achieve optimistic concurrency control.
+* Every time an object is updated, the **resource version is updated**.
+* If the latest resource version and inter resource version do not match it throws conflict and the update will fail.
+
 ## Docs: possible for PRs
 
 Historical information status (e.g., last transition time, failure counts) is only provided with reasonable effort, and is not guaranteed to not be lost.
