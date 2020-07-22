@@ -83,7 +83,8 @@ Before that lets see what is **optimistic concurrency control** and **pessimisti
 * **In Kubernetes** system we use optimistic concurrency control.
 * **Resource Versions (string)** under metadata section is used to achieve optimistic concurrency control.
 * Every time an object is updated, the **resource version is updated**.
-* If the latest resource version and inter resource version do not match it throws conflict and the update will fail.
+* If the latest resource version and inter resource version do not match it throws conflict and the update will fail. Conflicts occurs mainly due to race condition, when multiple resources tries to PUT or PATCH same resource simultaneously.
+* In case there are conflicts, client can fetch the resource version (GET) and try to POST it again. This is the recommended.
 
 ## Docs: possible for PRs
 
