@@ -45,6 +45,10 @@ display the version of kubernetes running on client and server **k version** or 
 
 display global options that can be passed to any *k* commands.
 
+```sh
+k get po --as=abhishek --kubeconfig=abhishek.kubeconfig
+```
+
 ## k api-resources
 
 Lists all resources of **k api-resources** **k api-resources --sort-by=name**.
