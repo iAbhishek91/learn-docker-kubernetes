@@ -91,6 +91,7 @@ docker run -e APP_COLOR=red my-image-name
 
 ```sh
 docker run -i my_container
+docker run -it my_container bash
 ```
 
 - **Port mapping** -p docker-host-port:container-internal-port

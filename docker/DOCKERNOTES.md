@@ -157,18 +157,18 @@ The above is the only difference between **CMD** and **ENTRYPOINT**.
 
 - When we install docker it creates three networks automatically `bridge`, `none` and `host`.
 - By default the each container gets attached with bridge network of the docker. We can change this using the below command.
-  - Bridge network:
-    They are private network.
-    Each container gets a IP address, generally in a range of '172.17.X.X'.
-    Containers can communicate within themselfs as they all are in the same private network.
-    However to work with the external world, port should be mapped.
-  Host network:
-    They are public network.
-    Both containers and docker hub uses the same network, hence no port mapping is required.
-    This also means that we cant run same containers on the same docker host (post will same).
-  None network:
-    The containers do not have any network attached.
-    Neither it can communicate with the internal containers nor it can communicate with the external world.
+  - **Bridge network**:
+    - They are private network.
+    - Each container gets a IP address, generally in a range of '172.17.X.X'.
+    - Containers can communicate within themselves as they all are in the same private network.
+    - However to work with the external world, port should be mapped.
+  - **Host network**:
+    - They are public network.
+    - Both containers and docker hub uses the same network, hence no port mapping is required.
+    - This also means that we cant run same containers on the same docker host (post will same).
+  - **None network**:
+    - The containers do not have any network attached.
+    - Neither it can communicate with the internal containers nor it can communicate with the external world.
 
 ```sh
 `docker run ubuntu` #containers are running in the bridge network
@@ -177,7 +177,7 @@ The above is the only difference between **CMD** and **ENTRYPOINT**.
 ```
 
 - We may come across a problem, as all the containers in a docker hosts can communicate with each other as they are in the same private network. How to separate them?
-- To separete group of containers to create user defined network within a docker host. Refer Docker command `docker network` comamnd how to implement the above.
+- To separate group of containers to create user defined network within a docker host. Refer Docker command `docker network` command how to implement the above.
 
 - The machine which runs docker is known as `docker host or docker engine`.
 - Now the engine runs multiple containers.
@@ -415,7 +415,7 @@ We combine multiple `docker run` command into `docker-compose`. How about swarm.
 
 - We still use docker-compose. But insted of `docker-compose up`, we use `docker stack deploy`.
 
-FYI: *Same type of containers combine together to form service, many services combine togather to form a stack. Stack generally represent a application*.
+FYI: *Same type of containers combine together to form service, many services combine together to form a stack. Stack generally represent a application*.
 
 ```yml
 version: 3
