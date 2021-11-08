@@ -33,6 +33,9 @@ yum install -y docker kubelet kubectl kubeadm kubernetes-cni
 
 ## kubeadm init
 
+<details>
+<summary> click here ... </summary>
+
 ```sh
 [root@master osboxes]# kubeadm init
 W0416 19:09:20.897590    2619 configset.go:202] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
@@ -107,8 +110,12 @@ kubeadm join 192.168.1.158:6443 --token ugbltx.ukgawau0c5209b95 \
     --discovery-token-ca-cert-hash sha256:6951e7437c5bac9828d1b771057795d172778cc7eb6bab44c29463e48c8a601f
 ```
 
-## /etc/kubernetes/manifest
+</details>
 
+## observe content of /etc/kubernetes/manifest
+
+<details>
+<summary> click here ... </summary>
 **Before** kubeadm init
 
 ```sh
@@ -129,7 +136,12 @@ total 24
 4 drwxr-xr-x. 4 root root 4096 Apr 16 19:09 ..
 ```
 
+</details>
+
 ## Kubectl config and list pods and nodes
+
+<details>
+<summary> click here ... </summary>
 
 ```sh
 [root@master osboxes]# echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> ~/.bashrc
@@ -149,9 +161,14 @@ NAME         STATUS     ROLES    AGE    VERSION
 master.k8s   NotReady   master   7h3m   v1.18.1
 ```
 
+</details>
+
 ## Worker node
 
 kubeadm join on both the worker nodes.
+
+<details>
+<summary> click here ... </summary>
 
 ```sh
 [root@node1 osboxes]# kubeadm join 192.168.1.158:6443 --token ugbltx.ukgawau0c5209b95 \
@@ -195,6 +212,8 @@ node1.k8s    NotReady   <none>   3m22s   v1.18.1
 node2.k8s    NotReady   <none>   118s    v1.18.1
 ```
 
+</details>
+
 ### Nodes are not ready
 
 In the above section we saw the none of the nodes are ready.
@@ -225,3 +244,56 @@ role.rbac.authorization.k8s.io/weave-net created
 rolebinding.rbac.authorization.k8s.io/weave-net created
 daemonset.apps/weave-net created
 ```
+
+## Kubernetes version allowed
+
+All based on API-server version. Also note Kubernetes supports only of three version, older versions goes into unsupported status.
+
+- API-version: 1.10
+- Controller-manager: (1 version less) v1.09, v1.10
+- kube-scheduler: (1 version less allowed)v1.09, v1.10
+- kubelet: (2 version less) v1.08, v1.09, v1.10
+- kube-proxy: (2 version less) v1.08, v1.09, v1.10
+- kubelet: (1 version + or 1 version -) v1.09, v1.10, v1.11
+
+## kubernetes upgrade
+
+<details>
+<summary>Click here ....</summary>
+
+```sh
+## On the master node
+# Step-1: Upgrade kubeadm tool itself
+apt update
+apt-cache madison kubeadm
+apt-get upgrade kubeadm=1.12.0-00
+# Step-2: validate the current status of the cluster, and look for upgrade option
+kubeadm upgrade plan
+# Step-3: upgrade the cluster - API-server
+kubeadm upgrade apply
+# Step-4: drain master node
+k drain controlplane
+# Step-5: upgrade kubelet on master node only
+apt-get upgrade kubelet=1.20.0-00
+# Step-6: restart the kubelet service
+systemctl daemon-reload
+systemctl restart kubelet
+# Step-7: make the master schedulable
+k uncordon controlplane
+
+## For each worker nodes
+# Step-1: make a worker node ready for upgrade
+k drain node-1 # (from master)
+# Step-2: upgrade kubeadm and kubelet on the worker node
+apt-get upgrade kubeadm=1.12.0-00 # (from the node)
+apt-get upgrade kubelet=1.20.0-00 # (from the node)
+# Step-3: upgrade the kubelet
+kubeadm upgrade node config --kubelet-version v1.12.0 # (from the node)
+# Step-4: restart the kubelet service
+systemctl daemon-reload
+systemctl restart kubelet # (from the node)
+# Step-5: make the node schedulable
+k uncordon node # (from the master)
+```
+
+</details>

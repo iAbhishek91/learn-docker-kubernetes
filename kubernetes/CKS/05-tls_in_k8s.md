@@ -1,9 +1,40 @@
 # TLS and K8s
 
-* Every communication between the components are secured.
-* server and client component has a pair of certificate (public key that is signed by CA signed) and a private key.
+## What is certificate
+
+Certificate is used to create trust between two parties communicating. It serves two purpose
+
+- it used to encrypt the data
+- as well as to identify itself as trusted entitiy in the communication
+
+### Interesting example of evolution
+
+Step-1: Initially, client used to send credential in plain text over the network to authenticate to the server, however, this is not save as hacker can sniff the data and hack into the server.
+
+Step-2: Client started encrypting the data with a random key. In this case the data is encrypted, and hacker cant read the data. But the server as well cant read the data as its encrypted, so user(client) needs to send the encryption key as well. So the threat remains same as hacker can get hold of the key and decrypt the data himself. This way is called **Symmetric encryption** as same key is used for encryption and decryption.
+
+Step-3: Now comes in the **Asymmetric encryption**, where pair of key is used for encryption and decryption. In case of certificates they are known as private and public keys. The way it works is, if a data is encrypted with the public key, then it can be opened by the corrosponding private key only. *Lets take example of SSH: we generate a ssh key pair using ssh-keygen command, then send the public key is shared with the server's .ssh/authorized_key file, this locks down the server. Only users who have the private key can communicate with the server.* In case of certificate(TLS) its very simlar, the server generates a key pair, the public key is then attached with the certificate and shared with the client, client can encrypt the data with the public key and send it back to the server. Since server is the only one with the corrosponding private key it can safely decrypt the data.
+
+Step-4: Now in previous step, back shared a certificate contianing the public key, however if you think this key is used to encrypt your confedintial data and passed on to the network. So there should be a way to validate that the certificate is coming from the bank you intend to, not from any other provider (*may be a hacker is providing you with the certificate, by tweaking your network and giving you a fake website which looks similar to the actual website*). So the concept of certificate signing comes into picture, a certificate can be self-signed or signed by CA(certificate authority). Self signed certificate are not safe.
+
+Step-5: Now the question comes how do browser knows that the certificate is signed by legitimate CA, and not fake ones? CA have their private key and public keys. CA uses their private keys to sign the certificate, and the CA's public key is prebuilt within the browser, if not we can easily import the CA certificate into the browser. Hence browser can decrypt the certificate details and ensures that this is website is having a trusted(signed by CA which your browser knows). **IMP**: most of the public CA have internal offering, which can be hosted privately by the organization to host its own CA. Then you can install the private CA's public key in the browser of all the employee.
+
+## Within the K8s
+
+- Every communication between the components are secured.
+- server and client component has a pair of certificate (public key that is signed by CA signed) and a private key.
+- In each request, we need to send the clinet key(private key), client certificate and ca certificate.
+
+**Question is why we need ca certificate?** the answer is to validate that client certificates are valid and signed by trusted user. Similar analogy why trusted CA's public key are installed in browser by default. For These reason remember CA.crt is to be drstributed to every client and server component that we discussed below.
+
+```sh
+curl https://kube-apiserver:6443/api/v1/pods --key admin.key --cert admin.crt --cacert ca.crt
+```
+
 
 ## create a CA
+
+> As discussed previously, CA should also have ca.csr and ca.crt
 
 ```sh
 openssl genrsa -out ca.key 2048
@@ -42,11 +73,15 @@ https://www.sslshopper.com/article-most-common-openssl-commands.html
 
 ### authentication using kubernetes API
 
+> NOTE: Its responsibilit of controller mananger to enalbe this APIs. there are controller within controller manager for CSR-Approving and CST-Signing.
+> NOTE: --cluster-signing-cert-file --cluster-signing-key-file values should be entered to make these API work.
+
 ```sh
 # Performed by the new user: create a private key
 openssl genrsa -out admin2.key 2048
 
-# Performed by the new user: create a csr using the private key
+# Performed by the new user: create a csr using the private key,
+# NOTE system:masters group is requried field for configuring Admin users
 openssl req -new -key admin2.key -out admin2.csr -subj “/CN=jenkins/O=system:masters”
 
 # Performed by existing admins: create a CSR k8s resource
@@ -122,6 +157,9 @@ openssl x509 -req -in jenkins.csr -CA /path/ca.crt -CAkey <(cat /path/ca.key) -C
 # OR using config
 openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial  -out etcd.crt -extensions v3_req -extfile etcd.cnf -days 100
 
+# to view a certificate and it details
+openssl x509 -in certificate/path/server.crt -text -noout
+
 # role for the name space
 kind: Role
 apiVersion: brace.authorization.k8s.io/v1beta1
@@ -171,4 +209,22 @@ k config set-context Jenkins-context —cluster=kubernetes —namespaece=jenkins
     --kubeconfig=worker1.kubeconfig
 
   }
+```
+
+## What's inside a certificate contains
+
+```yaml
+Certificate:
+  Data:
+    Serial Number: 420327018966204255
+  Signature Algorithm: sha256WithRSAEncryption
+    Issuer: CN=kubernetes
+    Validity
+      Not After : Feb 123:41:28 2022 GMT
+    Subject: CN=my-bank.com
+ X509v3 Subject Alternative Name:
+      DNS:mybank.com, DNS:i-bank.com,
+      DNS:we-bank.com,
+    Subject Public Key Info:
+      00:b9:b0:55:24:fb:a4:ef:77:73:7c:9b
 ```
