@@ -19,10 +19,23 @@ Step-4: Now in previous step, back shared a certificate contianing the public ke
 
 Step-5: Now the question comes how do browser knows that the certificate is signed by legitimate CA, and not fake ones? CA have their private key and public keys. CA uses their private keys to sign the certificate, and the CA's public key is prebuilt within the browser, if not we can easily import the CA certificate into the browser. Hence browser can decrypt the certificate details and ensures that this is website is having a trusted(signed by CA which your browser knows). **IMP**: most of the public CA have internal offering, which can be hosted privately by the organization to host its own CA. Then you can install the private CA's public key in the browser of all the employee.
 
+Step-6: Till now server is validated by the clients properly. However server do not know who is client. To achieve that. client creates a key and CSR and get it signed from the client's CA. Then this certificate is shared with the server. This not implemented for webserver or even if its implemented its under the hood, so that normal use need not need to create and manage certificate. But for communications like kubernetes, its important.
+
 ## Within the K8s
 
 - Every communication between the components are secured.
 - server and client component has a pair of certificate (public key that is signed by CA signed) and a private key.
+- Most common server components and their certificate: (All server certs are signed by server's own CA or a common one for all server certificate)
+  - kube-api Server: apiserver.crt | apiserver.key
+  - etcd Server: etcdserver.crt | etcdserver.key
+  - kubelet Server: node0x.crt | node0x.key
+- Most common client component and their certificates(All client certs are signed by server's CA):
+  - admin: admin.crt | admin.key (to communicate with API server)
+  - scheduler: scheduler.crt | scheduler.key(to communicate with API server)
+  - ctrl-mngr: controller-mngr.crt | controller-mngr.key(to communicate with API server)
+  - kube-proxy: kube-proxy.crt | kube-proxy.key(to communicate with API server)
+  - Kube-api server: api-etcd-client.crt | api-etcd-client.crt(to communicate with ETCD server)
+  - kube-api server: api-kubelet-client.crt | api-kubelet-client.key(to communicate with Kubelet server)
 - In each request, we need to send the clinet key(private key), client certificate and ca certificate.
 
 **Question is why we need ca certificate?** the answer is to validate that client certificates are valid and signed by trusted user. Similar analogy why trusted CA's public key are installed in browser by default. For These reason remember CA.crt is to be drstributed to every client and server component that we discussed below.

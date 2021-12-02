@@ -21,6 +21,15 @@ There are multiple gVisor that are available for multiple contianerized system. 
 
 Disadvantage of gVisor, not all apps work along with gVisor, so make sure you test the app. Also it may sometime cause performance problems as every requests goes through a middle man.
 
+```yaml
+# in exam they will give this
+apiVersion: node.k8s.io/v1beta1
+handler: runsc
+kind: RuntimeClass
+metadata:
+  name: gvisor
+```
+
 ## kata container
 
 Kata containers provides VM kernel for each containers. Unlike gVisor which speaks to single kernel, incase of kata container implementation each containers will have their own VM kernel.

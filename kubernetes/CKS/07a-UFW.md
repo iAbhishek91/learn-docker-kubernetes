@@ -1,4 +1,4 @@
-# Uncomplicated Firewall
+# Uncomplicated Firewall(UWF)
 
 Scenario:
 
@@ -9,7 +9,7 @@ Connection via
 Admin jump server: 172.16.238.5 (SSH:22, HTTP:80)
 Internal jump server: 172.16.100.0/28 (HTTP:80)
 
-Most simple firewall in Linux is **iptables**, however this comes with a bit of learning curve
+Internal packet filtering system is **Netfilter** and one of the CLI that interact with is **iptables**. Most simple firewall in Linux is **iptables**, however this comes with a bit of learning curve
 
 **UFW** is a simple and easy frontend for iptables.
 
@@ -23,7 +23,7 @@ systemctl enable ufw
 systemctl start ufw
 
 # check status
-ufw status # OUTPUT: Status: inactive
+ufw status # OUTPUT: Status: inactive. Firewall is restricted
 # allow all egress/outbound connection
 ufw default allow outgoing
 # default deny for all ingress
@@ -50,9 +50,9 @@ ufw status numbered
 #8080     DENY     Anywhere (line4)
 
 ## delete a rule
-ufw deny 8080
-ufw delete deny 8080
-# alternative way: by ufw status line number
+ufw deny 8080 # create a rule
+ufw delete deny 8080 # delete by name
+# alternative way: by ufw status line number from status numbered
 ufw delete 4
 
 # reset ufw

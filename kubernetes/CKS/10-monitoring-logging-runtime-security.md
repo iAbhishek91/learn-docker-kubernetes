@@ -16,8 +16,8 @@ Why we are discussing this in Kubernetes? Mutable pods or containers are more ex
 
 **Few way to ensure immutability of containers**:
 
-- Prevent: "k cp file_name pod_name:/file/path": make use of container level "securityContext.readOnlyRootFilesystem: true", but this may break the application itself as application may need to write to certain into directory and this will make the pod to go in error state. To fix this please use mounted volume exactly where the pod writes. The volume type mostly can be EmptyDir as we don't want to persist the data. Now: all the commands which make use of filereadwrite wwould fail: "k exec -it nginx -- apt update", "k cp ..."
-- Prevent running pods with "securityContext.privileged: true". Even if we have readonly permission, we can still change some file system like proc: execute the command "k exec -it nginx -- bash -c "echo '75' > /proc/sys/vm/swappiness""
+- Prevent: "k cp file_name pod_name:/file/path": make use of container level **securityContext.readOnlyRootFilesystem: true**, but this may break the application itself as application may need to write to certain into directory and this will make the pod to go in error state. To fix this please use mounted volume exactly where the pod writes. The volume type mostly can be EmptyDir as we don't want to persist the data. Now: all the commands which make use of filereadwrite wwould fail: "k exec -it nginx -- apt update", "k cp ..."
+- Prevent running pods with **securityContext.privileged: true**. Even if we have readonly permission, we can still change some file system like proc: execute the command "k exec -it nginx -- bash -c "echo '75' > /proc/sys/vm/swappiness""
 - Prevent pods to run as root user: "securityContext.runAsUser: 0"
 - Prevent: "k exec -it nginx -- bash nginx:/etc/nginx"
 

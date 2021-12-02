@@ -5,7 +5,7 @@ As we know its the captain of the ship, major functionality
 - **register/etc a nodes** as instructed by API-server
 - **send status to API-server back about the status**
 - **creates a pod** by interacting with container runtime
-- **Minitors and generate logs about the status of the nodes**
+- **Monitors and generate logs about the status of the nodes**
 - **kubelet are not deployed in container** and its not part of kubeadm as well.
 
 ## installation/configuration of kubelet

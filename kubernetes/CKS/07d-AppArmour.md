@@ -38,7 +38,7 @@ cat /sys/kernel/security/apparmor/profiles
 ### Examples of Apparmor profiles
 
 <details>
-<summary>Example, note these profile files are not created manually</summary>
+<summary>Example, note these profile files are not created manually, they are created using app-armor tool</summary>
 
 Rule 1: deny write to entire fs
 
@@ -114,7 +114,7 @@ create a apparmor profile for this above script
 apt-get install -y apparmor-utils
 
 #Step-2: generate a profile for a above script
-apt-genprof /home/abhishekd/work/github/learn-docker-kubernetes/kubernetes/CKS/07d-apparmor-app.sh
+aa-genprof /home/abhishekd/work/github/learn-docker-kubernetes/kubernetes/CKS/07d-apparmor-app.sh
 ## will ask for questionnaire
 # press (s) to scan
 # if we want profile to run mkdir command
@@ -162,7 +162,7 @@ kind: Pod
 metadata:
   name: dummy
   annotations:
-    container.apparmor.security.beta.kubernetes.io/nothing<container-name>: localhost/apparmor-deny-write<profilename>
+    container.apparmor.security.beta.kubernetes.io/nothing<container-name>: localhost/apparmor-deny-write #<profilename>
 spec:
   containers:
   - name: nothing

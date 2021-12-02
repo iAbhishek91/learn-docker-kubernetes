@@ -27,16 +27,17 @@ strace -p <pid from above command>
 ```
 
 - traces syscall of a containers
-- Open source
+- Open source from aquasecurity
 - EBPF(extended Berkeley Packer Filter) is used to trace the system at runtime. EBPF helps you to run code in kernel space without loading any kernel modules or interfering with kernel code.
 
 ## Run tracee
 
+Pre-requisite:
 we need to bind below paths:
 
-- /tmp/tracee Default workspace
-- /lib/modules Kernel Headers
-- /usr/src Kernel Headers
+- /tmp/tracee  # Default workspace, tracee EBPF program is compiled and saved here
+- /lib/modules # Kernel Headers to compile tracee program
+- /usr/src # Dependencies of Kernel Headers to compile tracee program
 
 also it requires privilege flag
 

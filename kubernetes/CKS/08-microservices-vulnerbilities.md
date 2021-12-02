@@ -36,6 +36,8 @@ To give a taste of what admission controller can do:
 **check enabled Admission controllers**:
 
 ```sh
+# default admission controller
+k exec -it kube-apiserver-controlplane -- kube-apiserver -h | grep enable-admission-plugins # lists all the admission controller that are enabled by default
 # in control-plane node,
 ps -ef | grep kube-apiserver | grep admission-plugins
 # check the api-server -o yaml
@@ -59,8 +61,8 @@ k get po kube-apiserver-controlplane -o yaml
 **Define custom Admission controller**:
 
 - to support custom AC: there are two special admission controller
-  - MutatingAdmission Webhook
-  - ValidatingAdmission Webhook
+  - MutatingAdmissionWebhook
+  - ValidatingAdmissionWebhook
 - Custom admission controller runs our custom logic in a separate webhook server(can be a pod, container or linux service)(can be in any language, only requirement is that it accept connection from the webhook controller and response back with proper JSON).
 - Once all the AC is executed, Mutating AdmissionWebhook makes a call to custom mutating admission controller by sending the JSON object.
 - The Custom mutating AC then return back with the JSON and "allowed" flag back to webhook.
@@ -128,18 +130,19 @@ webhooks:
 
 ```
 
-## Pod Security Policies
+## Pod Security Policies[deprecated in 1.21, removed in 1.25 because of complexity, something similar will be coming soon by then]
 
 **PodSecurityPolicy** is a built in admission controller that is not enabled by default. The controller looks for all pod creation method and validates the pod creation mechanism. Along with validation PSP can add/mutate the pod metadata.
 
 Step-1: Enable PSP admission controller in the API-server:
 
 ```sh
+## NOTE: if you enable PSP and there is not policy defined all pod will be prevented from creation
 # enable it by
 - --enable-admisison-plugins=PodSecurityPolicy
 ```
 
-Step-2: Authorize PSP to communicate with PSP resources
+Step-2: Authorize User/SA to communicate with PSP resources
 
 Whom to authorize? The user who is creating the pod i,e the service account associate with the pod should have access to PSP API, so that pod can read the policy and validate it. This is done using RBAC.
 

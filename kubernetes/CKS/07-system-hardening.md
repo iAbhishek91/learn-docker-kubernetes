@@ -97,6 +97,8 @@ This as well is purely Linux, where we try to harden the SSH connectivity to the
 
 SSH config is stored in **/etc/ssh/sshd_config**
 
+> NOTE there are two type of ssh configuration: one for ssh client and one for ssh daemon: ssh_config and sshd_config
+
 ```txt
 /etc/ssh/sshd_config
 # bock ssh for root user
@@ -119,12 +121,9 @@ refer to interview-questions/os/linux.md
 
 We want only the required modules in the system, and they are updated regularly so that they have latest security patches applied.
 
-Services runs by following the below steps:
+Services(is managed by systemd process) runs by following the below stages:
 
-- BIOS POST
-- Boot Loader (GRUB2)
-- Kernel initialization
-- INIT process (SystemD) services that are enabled
+**BIOS POST** >> **Boot Loader (GRUB2)** >> **Kernel initialization** >> **INIT process (SystemD)** >> services that are enabled
 
 ```sh
 #list all the packages installed in system

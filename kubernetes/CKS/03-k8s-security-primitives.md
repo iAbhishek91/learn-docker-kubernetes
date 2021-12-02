@@ -61,6 +61,35 @@ curl -v -k https://localhost:6443/api/v1/pods --header "Authorization: Bearer to
 IMPORTANT: role and role-binding are still required to be defined.
 ```
 
+**service account**: token that is created can also be used like above
+
+disable **spec.automountServiceaccountToken: false** in the pod
+
+```yaml
+#CSR
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  groups:
+  - system:masters
+  - system:authenicated
+  username: akshay
+  request: $(cat /path/to/csr | base64 | tr -d '\n') # use this command ot get the string and paste it
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+```
+
+```sh
+# approve the certificate
+k certificate approve akshay
+
+# retrieve certificate
+k 
+```
+
 ## Authorization
 
 Refer: 03a-authorization-rbac.md

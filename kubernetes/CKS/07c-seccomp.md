@@ -6,7 +6,7 @@ We have seen that system call made by container, command , processes can be trac
 
 However if we want to restrict any system call, use Seccomp.
 
-Allowing application to make any syscalls(all 435), basically increases the attack surface.
+By default Linux allows application to make any syscalls(all 435), basically increases the attack surface.
 
 ## Check if seccomp is enable
 
@@ -182,21 +182,21 @@ metadata:
     run: amicontianed
   name: amicontained
 spec:
-  securityContext: #this will enable seccomp on the pod
+  securityContext: #this will enable seccomp on the pod(not allowed under containers)
     seccompProfile:
-      type: RuntimeDefault # default fo docker, also **Unconfined** is allowed( default), **Localhost** for custom seccomp
+      type: Localhost # **RuntimeDefault** default of docker,**Unconfined** default for kubernetes, **Localhost** for custom seccomp
       localhostProfile: <path to the custom JSON file> # used only in case of **Localhost** only. This path is not mounted, it should be relative to default seccomp profile location which is by default: /var/lib/kubelet/seccomp
       # step-1: create a directory under: /var/lib/kubelet/seccomp/profiles/audit.json { "defaultAction": "SCMP_ACT_LOG"} OR to block everything: { "defaultAction": "SCMP_ACT_ERRONO" } note for block all the container will not be created as no syscalls are allowed
       # step-2: provide the path in the pod yaml profiles/audit.json
-      # step-3: validate the logs in /var/log/syslog file
-      # step-4: in the syslog there will numbers syscall=35|257 etc what are these? to map grep -w 35 /usr/include/asm/unistd_64.h
+      # step-3: validate the logs in /var/log/syslog file (grep syscall /var/log/syslog numbers are in /usr/include/asm-generic/unistd.h)
+      # step-4: in the syslog there will numbers syscall=35|257 etc what are these? to map grep -w 35 /usr/include/asm-generic/unistd_64.h
   containers:
   - args:
     - amicontained
     image: r.j3ss.co/amicontained
     name: amicontained
     securityContext:
-      allowPrivilegeEscalation: false # ensure that pods runs with bare minimum security alone
+      allowPrivilegeEscalation: false # ensure that pods runs with bare minimum security alone and do not override parent process security context
 ```
 
 ### in CKS exam

@@ -8,17 +8,30 @@ This is because apart from syscall security docker and Kubernetes both used linu
 
 < Kernel 2.2, processes were segregated into two catagories: privileged and unprivileged process. Privileged process can basically can do any thing on the system.
 
-However, > kernel 2.2 capabilities were defined, where privileged process were granted sub-set of permissions known as capabilities. CAP_CHOWN, CAP_NET_ADMIN, CAP_SYS_BOOT, CAP_SYS_TIME, CAP_KILL etc.. There are created based on the functionality.
+However, > kernel 2.2(since 1999) capabilities were defined, where privileged process were granted sub-set of permissions known as capabilities. CAP_CHOWN, CAP_NET_ADMIN, CAP_SYS_BOOT, CAP_SYS_TIME, CAP_KILL etc.. There are created based on the functionality.
 
-## Check capability required by each command/processes
+Entire list of capabilities: man capabilities || https://man7.org/linux/man-pages/man7/capabilities.7.html
+
+## What are linux capabilities and why its required apart from system calls
+
+All the privileges that were available to **privilege process** were divided into distinct units called **capabilities**. These capabilities can be enabled or disabled per thread.
+
+## set and get capability required by each command/processes
+
+Each command needs one/multiple capabilities.
 
 ```sh
+# to set capabilities
+#flag sets: there are three flags e(effective), p(permitted), i(inherited)
+#operators: = + -
+setcap cap_net_raw=ep ping 
+
 # For command
 getcap /usr/bin/ping
 # /usr/bin/ping = cap_net_raw+ep
 
 # For processes
-getpcap pid
+getpcaps pid
 ```
 
 ## capability in kubernetes

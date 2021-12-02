@@ -45,3 +45,8 @@ Refer CKS_Curriculum.pdf for details
 - 20% minimize microservice vulnerabilities
 - 20% supply chain security
 - 20% monitoring, logging and runtime security
+
+## tricks
+
+print name of current namespace: k config get-contexts `k config current-context` --no-headers=true | awk '{ print $5 }'
+change namespace: k config set-context --current --namespace $1

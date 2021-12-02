@@ -1,13 +1,13 @@
 # Kube-bench
 
-- Its a open source tool for **aqua-security**.
+- Its a open source tool from **aqua-security**.
 - Perform automated checks in Kubernetes cluster to verify cluster is deployed as per security best practices
 - It matches the CIS benchmarks
 
 ## Installation
 
 - as Docker container
-- As POD in a cluster
+- as POD in a cluster
 - as binary
 - compile from source code
 
